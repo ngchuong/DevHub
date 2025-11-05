@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -16,11 +17,15 @@ async function main() {
 
   // Create users
   console.log('👥 Creating users...');
+
+  // Hash passwords before storing
+  const hashedPassword = await bcrypt.hash('password123', 10);
+
   const user1 = await prisma.user.create({
     data: {
       username: 'john_dev',
       email: 'john@example.com',
-      password: 'password123',
+      password: hashedPassword,
       avatarUrl:
         'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
       bio: 'Full-stack developer passionate about React and Node.js',
@@ -35,7 +40,7 @@ async function main() {
     data: {
       username: 'sarah_ui',
       email: 'sarah@example.com',
-      password: 'password123',
+      password: hashedPassword,
       avatarUrl:
         'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150',
       bio: 'UI/UX Designer & Frontend Developer',
@@ -50,7 +55,7 @@ async function main() {
     data: {
       username: 'mike_backend',
       email: 'mike@example.com',
-      password: 'password123',
+      password: hashedPassword,
       avatarUrl:
         'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
       bio: 'Backend engineer specializing in microservices',

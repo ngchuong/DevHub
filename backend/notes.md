@@ -2,4 +2,4 @@
 
 - Migrate: npx prisma migrate dev --name init
 
-- Seed data: npx ts-node prisma/seed.ts
+- Seed data: docker-compose exec backend npx ts-node backend/prisma/seed.ts
