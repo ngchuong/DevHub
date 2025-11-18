@@ -53,5 +53,17 @@ services:
         yarn prisma migrate deploy || yarn prisma db push --accept-data-loss &&
         yarn start:dev
       "
+  frontend:
+    build:
+      context: ./frontend
+    container_name: devhub_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
 volumes:
   postgres_data:
