@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient, type Project, type Comment, type User } from "@/lib/api";
-import { mockProjects, mockUsers } from "@/lib/mock-data";
+import { mockProjects } from "@/lib/mock-data";
 import { ProjectDetails } from "@/components/projects/project-details";
 import { CommentsSection } from "@/components/projects/comments-section";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ export default function PostDetailPage() {
 
     useEffect(() => {
         loadData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [projectId]);
 
     useEffect(() => {

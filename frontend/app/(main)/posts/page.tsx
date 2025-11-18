@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { PostListItem } from "@/components/projects/post-list-item";
 import { TrendingPosts } from "@/components/projects/trending-posts";
 import { apiClient, type Project, type User } from "@/lib/api";
 import { mockProjects } from "@/lib/mock-data";
 
 export default function PostsPage() {
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +50,25 @@ export default function PostsPage() {
     }
   };
 
+  // Filter projects based on search query
+  const filteredProjects = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return projects;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    return projects.filter((project) => {
+      const titleMatch = project.title.toLowerCase().includes(query);
+      const descriptionMatch = project.description.toLowerCase().includes(query);
+      const techStackMatch = project.techStack?.some((tech) =>
+        tech.toLowerCase().includes(query)
+      );
+      const authorMatch = project.author?.username.toLowerCase().includes(query);
+
+      return titleMatch || descriptionMatch || techStackMatch || authorMatch;
+    });
+  }, [projects, searchQuery]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -65,6 +88,17 @@ export default function PostsPage() {
           </div>
         )}
 
+        {/* Search Results Info */}
+        {searchQuery && (
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {filteredProjects.length === 0
+                ? "No projects found"
+                : `Found ${filteredProjects.length} project${filteredProjects.length !== 1 ? "s" : ""} for "${searchQuery}"`}
+            </p>
+          </div>
+        )}
+
         <div className="flex gap-8">
           {/* Main Content - Posts List */}
           <div className="flex-1 min-w-0">
@@ -74,9 +108,18 @@ export default function PostsPage() {
                   No projects found. Check back later!
                 </p>
               </div>
+            ) : filteredProjects.length === 0 && searchQuery ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground mb-2">
+                  No projects found matching &quot;{searchQuery}&quot;
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Try a different search term
+                </p>
+              </div>
             ) : (
               <div className="space-y-4">
-                {projects.map((project) => (
+                {filteredProjects.map((project) => (
                   <PostListItem
                     key={project.id}
                     project={project}
@@ -89,7 +132,9 @@ export default function PostsPage() {
 
           {/* Sidebar - Trending Posts */}
           <aside className="hidden lg:block w-80 shrink-0">
-            {projects.length > 0 && <TrendingPosts projects={projects} />}
+            {projects.length > 0 && !searchQuery && (
+              <TrendingPosts projects={projects} />
+            )}
           </aside>
         </div>
       </div>
